@@ -1,0 +1,22 @@
+{
+  "name": "recipe-api",
+  "version": "1.0.0",
+  "description": "An ai app that creates and saves a recipe based on what i have in the fridge.",
+  "keywords": [
+    "#ai",
+    "#recipe",
+    "#aws",
+    "#langchain"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "not-yet"
+  },
+  "license": "UNLICENSED",
+  "author": "ebarbieri",
+  "type": "commonjs",
+  "main": "index.js",
+  "scripts": {
+    "test": "npm run test"
+  }
+}
