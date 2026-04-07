@@ -17,14 +17,11 @@ provider:
 
 functions:
   api:
-    handler: src/handlers/router.handler
+    handler: src/handlers/suggestionHandler.handler
     timeout: 120
     events:
       - httpApi:
           path: /v1/recipes/suggestions
-          method: POST
-      - httpApi:
-          path: /v1/recipes/selected
           method: POST
 
 custom:

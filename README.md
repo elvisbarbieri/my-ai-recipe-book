@@ -1,6 +1,8 @@
 # Recipe API
 
-Serverless API on **AWS Lambda** (Node.js 20) that accepts a **base64-encoded image** of ingredients, calls **OpenAI** via **LangChain** to suggest recipes, and returns structured JSON. A second route is reserved for **persisting selected recipes** (S3 stub today).
+Serverless API on **AWS Lambda** (Node.js 20) that accepts a **base64-encoded image** of ingredients, calls **OpenAI** via **LangChain** to suggest recipes, and returns structured JSON.
+
+**User selections** (saving which recipes the user chose—for example to **S3** via a dedicated endpoint) are **not implemented yet** (**TBD**). Only recipe **suggestions** are live today.
 
 ---
 
@@ -13,15 +15,24 @@ Client (image as base64)
   API Gateway (HTTP API)  ──or──  serverless-offline :3000
         │
         ▼
-  Lambda: single function `api`
-  handler: src/handlers/router.handler
+  Lambda: function `api`
+  handler: src/handlers/suggestionHandler.handler
         │
-        ├── POST /v1/recipes/suggestions  → suggestionHandler
-        └── POST /v1/recipes/selected     → selectedHandler
+        └── POST /v1/recipes/suggestions
 ```
 
-- **One Lambda**, **one router** (`router.js`) that dispatches by `method` + `path` (same pattern as API Gateway HTTP API events).
+- **One Lambda**, **one HTTP route** — `serverless.yml` points directly at **`suggestionHandler`** (no router).
 - **Business logic** for AI lives in `src/services/LangChainService.js`.
+
+### Selections (TBD)
+
+Planned later, not in this repo yet:
+
+- An API for the client to **submit chosen recipe(s)** after the user picks from suggestions.
+- **Persistence** (e.g. **S3**), using `S3_BUCKET_NAME` and IAM on the Lambda.
+- A route such as `POST /v1/recipes/selected` (name and contract **TBD**).
+
+Until then, the client can keep selections in local state only.
 
 ---
 
@@ -55,19 +66,13 @@ Client (image as base64)
 
 ---
 
-## Request flow: selected recipes (stub)
-
-`POST /v1/recipes/selected` is wired in **`selectedHandler.js`**. It currently returns a placeholder payload (`stored: []`, note about S3). This is where you will later write objects to **S3** (and optionally read `S3_BUCKET_NAME` from the environment).
-
----
-
 ## Configuration
 
 | Variable | Where | Purpose |
 |----------|--------|---------|
 | `OPENAI_API_KEY` | `.env` (local) / Lambda env (deployed) | OpenAI API key |
 | `OPENAI_MODEL` | optional | Defaults to `gpt-4o-mini` in code if unset |
-| `S3_BUCKET_NAME` | `serverless.yml` → `provider.environment` | Future S3 writes |
+| `S3_BUCKET_NAME` | `serverless.yml` → `provider.environment` | **TBD** — for future “save selections” flow; unused until that feature ships |
 | `AWS_REGION` | shell or CI | Region for deploy |
 
 Create a **`.env`** in the project root (never commit it):
@@ -114,11 +119,11 @@ curl -s -X POST http://localhost:3000/v1/recipes/suggestions \
 
 | Path | Role |
 |------|------|
-| `serverless.yml` | Service name, provider, Lambda `api`, HTTP routes, plugins |
-| `src/handlers/router.js` | Routes requests to suggestion vs selected handler |
-| `src/handlers/suggestionHandler.js` | Validates input, calls `LangChainService`, returns JSON |
-| `src/handlers/selectedHandler.js` | Stub for future S3 persistence |
+| `serverless.yml` | Service name, provider, Lambda `api`, HTTP route, plugins |
+| `src/handlers/suggestionHandler.js` | Lambda entry: validates input, calls `LangChainService`, returns JSON |
 | `src/services/LangChainService.js` | OpenAI call + `parseRecipesFromLlmOutput` |
+
+There is **no** `selected` handler or router in the tree; selections are **TBD** (see above).
 
 ---
 
