@@ -1,0 +1,32 @@
+service: recipe-api
+
+frameworkVersion: "4"
+
+plugins:
+  - serverless-offline
+
+provider:
+  name: aws
+  runtime: nodejs20.x
+  region: ${opt:region, env:AWS_REGION, "us-east-1"}
+  stage: ${opt:stage, "dev"}
+  environment:
+    S3_BUCKET_NAME: ${env:S3_BUCKET_NAME, ""}
+    OPENAI_API_KEY: ${env:OPENAI_API_KEY, ""}
+    OPENAI_MODEL: ${env:OPENAI_MODEL, "gpt-4o-mini"}
+
+functions:
+  api:
+    handler: src/handlers/router.handler
+    timeout: 120
+    events:
+      - httpApi:
+          path: /v1/recipes/suggestions
+          method: POST
+      - httpApi:
+          path: /v1/recipes/selected
+          method: POST
+
+custom:
+  serverless-offline:
+    httpPort: 3000

@@ -17,6 +17,19 @@
   "type": "commonjs",
   "main": "index.js",
   "scripts": {
-    "test": "npm run test"
+    "test": "npm run test",
+    "offline": "serverless offline",
+    "deploy": "serverless deploy",
+    "remove": "serverless remove",
+    "invoke:local": "serverless invoke local --function api"
+  },
+  "devDependencies": {
+    "serverless": "^4.33.2",
+    "serverless-offline": "^14.5.0"
+  },
+  "dependencies": {
+    "@langchain/core": "^1.1.38",
+    "@langchain/openai": "^1.4.1",
+    "dotenv": "^17.4.0"
   }
 }
